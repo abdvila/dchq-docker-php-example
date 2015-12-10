@@ -4,8 +4,12 @@ To run & manage the **9** PHP application templates (LAMP, LAPP, and LAOP Stacks
 
 [![Customize and Run](https://dl.dropboxusercontent.com/u/4090128/dchq-customize-and-run.png)](https://www.dchq.io/landing/products.html#/library?org=DCHQ)
 
- 
+
 Customize & Run all the published Docker PHP application templates (including the LAMP, LAPP, and LAOP Stacks) and many other templates (including multi-tier Java application stacks, Mongo Replica Set Cluster, Drupal, Wordpress, MEAN.JS, etc.)
+
+<figure>
+<img src="dchq-docker-php-screenshots/000-names-directory-docker-php-app.png"/>
+</figure>
 
 **Table of Contents**  
 
@@ -227,7 +231,7 @@ Once the required fields are completed, a user can click **Save**.
 A user can then click on the **Play Button** to build the Docker image on-demand.
 
 <figure>
-<img src="screenshots/0-Rackspace%20Cluster.png"  />
+<img src="dchq-docker-php-screenshots/000-automated-php-docker-image-build.png"/>
 </figure>
 
 Here's the actual Dockerfile used to build this Docker image from this GitHub repository:
@@ -658,13 +662,13 @@ Once an application is saved, a user can register a Cloud Provider to automate t
 First, a user can register a Cloud Provider for Rackspace (for example) by navigating to **Manage** > **Cloud Providers & Repos** and then clicking on the **+** button to select **Rackspace**. The Rackspace API Key needs to be provided – which can be retrieved from the Account Settings section of the Rackspace Cloud Control Panel.
 
 <figure>
-<img src="screenshots/0-Rackspace%20Cloud%20Provider.png"  />
+<img src="dchq-docker-php-screenshots/000-rackspace-cloud-provider.png"/>
 </figure>
 
 A user can then create a cluster with an auto-scale policy to automatically spin up new Cloud Servers. This can be done by navigating to **Manage** > **Clusters** page and then clicking on the **+** button. You can select a capacity-based placement policy and then **Weave** as the networking layer in order to facilitate secure, password-protected cross-container communication across multiple hosts within a cluster. The **Auto-Scale Policy** for example, may set the maximum number of VM’s (or Cloud Servers) to 10.
 
 <figure>
-<img src="screenshots/0-Rackspace%20Cluster.png"  />
+<img src="dchq-docker-php-screenshots/000-rackspace-cluster.png"/>
 </figure>
 
 A user can now provision a number of Cloud Servers on the newly created cluster either through the UI-based workflow or by defining a simple YAML-based Machine Compose template that can be requested from the Self-Service Library.
@@ -672,7 +676,7 @@ A user can now provision a number of Cloud Servers on the newly created cluster 
 **UI-based Workflow** – A user can request Rackspace Cloud Servers by navigating to **Manage** > **Hosts** and then clicking on the **+** button to select **Rackspace**. Once the Cloud Provider is selected, a user can select the region, size and image needed. Ports are opened by default on Rackspace Cloud Servers to accommodate some of the port requirements (e.g. 32000-59000 for Docker, 6783 for Weave, and 5672 for RabbitMQ). A Cluster is then selected and the number of Cloud Servers can be specified.
 
 <figure>
-<img src="screenshots/0-Rackspace%20Cloud%20Server%20UI-based%20Request.png"  />
+<img src="dchq-docker-php-screenshots/000-rackspace-cloud-server-ui-based-request.png"/>
 </figure>
 
 **YAML-based Machine Compose Template** – A user can first create a Machine Compose template for Rackspace by navigating to **Manage** > **Templates** and then selecting **Machine Compose**.
@@ -689,7 +693,7 @@ Medium:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 <figure>
-<img src="screenshots/0-Rackspace%20Cloud%20Server%20Machine%20Compose%20Template.png"  />
+<img src="dchq-docker-php-screenshots/000-rackspace-cloud-server-machine-compose-template.png"/>
 </figure>
 
 The supported parameters for the Machine Compose template are summarized below:
@@ -728,7 +732,7 @@ Once the Cloud Servers are provisioned, a user can deploy a multi-tier, Docker-b
 A user can select an Environment Tag (like DEV or QE) and the Rackspace Cluster created before clicking on Run.
 
 <figure>
-<img src="screenshots/0-Application%20Request.png"  />
+<img src="dchq-docker-php-screenshots/000-php-app-request.png"/>
 </figure>
 
 Accessing The In-Browser Terminal For The Running Containers
@@ -739,7 +743,7 @@ A command prompt icon should be available next to the containers’ names on the
 For the PHP deployment for example, we used the command prompt to make sure that the PHP code is indeed under the /var/www/html/ directory.
 
 <figure>
-<img src="screenshots/0-In-Browser%20Container%20Terminal.png"  />
+<img src="dchq-docker-php-screenshots/000-docker-in-browser-terminal.png"/>
 </figure>
 
 Monitoring the CPU, Memory & I/O Utilization of the Running Containers
@@ -750,12 +754,13 @@ Once the application is up and running, our developers monitor the CPU, Memory, 
 A user can perform historical monitoring analysis and correlate issues to container updates or build deployments. This can be done by clicking on the **Actions** menu of the running application and then on **Monitoring**. A custom date range can be selected to view CPU, Memory and I/O historically.
 
 <figure>
-<img src="screenshots/0-App%20Day-2%20Operations.png"  />
+<img src="dchq-docker-php-screenshots/000-php-app-day-2-operations.png"/>
 </figure>
 
 <figure>
-<img src="screenshots/0-Containers%20Monitoring.png"  />
+<img src="dchq-docker-php-screenshots/000-docker-php-monitoring.png"/>
 </figure>
+
 
 Enabling the Continuous Integration Using Automated App Run
 ----------------------------------------------------------------------------------------------------------------------------------
@@ -783,7 +788,7 @@ A user can then navigate to **Automate** > **App Run** and then click on the **+
 -   **Who Can Manage**: a user can provide granular entitlements here to dictate who else can manage this "App Run" policy.
 
 <figure>
-<img src="screenshots/0-Continuous%20Delivery.png"  />
+<img src="dchq-docker-php-screenshots/000-app-auto-run.png"  />
 </figure>
 
  
@@ -796,7 +801,7 @@ If the running application becomes resource constrained, a user can to scale out
 To scale out the cluster of PHP containers from 1 to 2, a user can click on the **Actions** menu of the running application and then select **Scale Out**. A user can then specify the new size for the cluster and then click on **Run Now**.
 
 <figure>
-<img src="screenshots/0-Scale%20Out.png"  />
+<img src="dchq-docker-php-screenshots/000-scale-out-php-containers.png"  />
 </figure>
 
 We then used the BASH plug-in to update Apache HTTP Server's httpd.conf file so that it’s aware of the new application server added. The BASH script plug-ins can also be scheduled to accommodate use cases like cleaning up logs or updating configurations at defined frequencies. 
@@ -804,10 +809,14 @@ We then used the BASH plug-in to update Apache HTTP Server's httpd.conf file so 
 To execute a plug-in on a running container, a user can click on the **Actions** menu of the running application and then select **Plug-ins**. A user can then select the load balancer (Apache HTTP Server) container, search for the plug-in that needs to be executed, enable container restart using the toggle button. The default argument for this plug-in will dynamically resolve all the container IP’s of the running PHP containers and add them as part of the httpd.conf file.
 
 <figure>
-<img src="screenshots/0-Plug-in%20Update%20Apache%20HTTP%20Server.png"  />
+<img src="dchq-docker-php-screenshots/000-apache-http-server-plugin.png"  />
 </figure>
 
 An application time-line is available to track every change made to the application for auditing and diagnostics. This can be accessed from the expandable menu at the bottom of the page of a running application.
+
+<figure>
+<img src="dchq-docker-php-screenshots/000-application-timeline.png"  />
+</figure>
 
 Alerts and notifications are available for when containers or hosts are down or when the CPU & Memory Utilization of either hosts or containers exceed a defined threshold.
 
