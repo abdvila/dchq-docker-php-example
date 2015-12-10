@@ -1,7 +1,11 @@
-To run & manage the **3** PHP application templates in this project on 13 different clouds and virtualization platforms (including vSphere, OpenStack, AWS, Rackspace, Microsoft Azure, Google Compute Engine, DigitalOcean, IBM SoftLayer, etc.), make sure that you either:
+To run & manage the **9** PHP application templates (LAMP, LAPP, and LAOP Stacks) in this project on 13 different clouds and virtualization platforms (including vSphere, OpenStack, AWS, Rackspace, Microsoft Azure, Google Compute Engine, DigitalOcean, IBM SoftLayer, etc.), make sure that you either:
 -   **Sign Up for FREE on DCHQ.io** -- <http://dchq.io> (no credit card required), or
 -   **Download DCHQ On-Premise Standard Edition for FREE** -- <http://dchq.co/dchq-on-premise-download.html>
 
+[![Customize and Run](https://dl.dropboxusercontent.com/u/4090128/dchq-customize-and-run.png)](https://www.dchq.io/landing/products.html#/library?org=DCHQ)
+
+ 
+Customize & Run all the published Docker PHP application templates (including the LAMP, LAPP, and LAOP Stacks) and many other templates (including multi-tier Java application stacks, Mongo Replica Set Cluster, Drupal, Wordpress, MEAN.JS, etc.)
 
 **Table of Contents**  
 
@@ -16,6 +20,12 @@ To run & manage the **3** PHP application templates in this project on 13 differ
 		- [LAMP Stack (Linux-Apache-MySQL-PHP)](#3-tier-java-nginx--tomcat--mysql)
 		- [LAPP Stack (Linux-Apache-PostgreSQL-PHP)](#3-tier-java-nginx--jetty--mysql)
 		- [LAOP Stack (Linux-Apache-Oracle-XE-PHP)](#3-tier-java-nginx--jboss--mysql)
+		- [LAMP Stack (3-Tier Nginx-PHP-MySQL)](#3-tier-java-nginx--tomcat--mysql)
+		- [LAPP Stack (3-Tier Nginx-PHP-PostgreSQL)](#3-tier-java-nginx--tomcat--mysql)
+		- [LAOP Stack (3-Tier Nginx-PHP-Oracle-XE)](#3-tier-java-nginx--tomcat--mysql)
+		- [LAMP Stack (3-Tier Apache-HTTP-PHP-MySQL)](#3-tier-java-nginx--tomcat--mysql)
+		- [LAPP Stack (3-Tier Apache-HTTP-PHP-PostgreSQL)](#3-tier-java-nginx--tomcat--mysql)
+		- [LAOP Stack (3-Tier Apache-HTTP-PHP-Oracle-XE)](#3-tier-java-nginx--tomcat--mysql)
 		- [Invoking a plug-in to initialize the database separately on a Docker LAMP Stack](#invoking-a-plug-in-to-initialize-the-database-separately-on-a-docker-lamp-stack)
 	- [Provisioning & Auto-Scaling the Underlying Infrastructure on Any Cloud](#provisioning--auto-scaling-the-underlying-infrastructure-on-any-cloud)
 	- [Deploying the Multi-Tier PHP Application on the Rackspace Cluster](#deploying-the-multi-tier-java-application-on-the-rackspace-cluster)
@@ -42,7 +52,7 @@ Background
 
 Containerizing enterprise applications is still a challenge mostly because existing application composition frameworks do not address complex dependencies, external integrations or auto-scaling workflows post-provision. Moreover, the ephemeral design of containers meant that developers had to spin up new containers and re-create the complex dependencies & external integrations with every version update.
 
-DCHQ, available in hosted and on-premise versions, addresses all of these challenges and simplifies the containerization of enterprise applications through an advance application composition framework that extends Docker Compose with cross-image environment variable bindings, extensible BASH script plug-ins that can be invoked at request time or post-provision, and application clustering for high availability across multiple hosts or regions with support for auto scaling.
+DCHQ, available in hosted and on-premise versions, addresses all of these challenges and simplifies the containerization of enterprise applications through an advanced application composition framework that extends Docker Compose with cross-image environment variable bindings, extensible BASH script plug-ins that can be invoked at request time or post-provision, and application clustering for high availability across multiple hosts or regions with support for auto scaling.
 
 Once an application is provisioned, a user can monitor the CPU, Memory, & I/O of the running containers, get notifications & alerts, and get access to application backups, automatic scale in/out workflows, and plug-in execution workflows to update running containers. Moreover, automated "App Run" allows users to integrate their Continuous Integration workflows to schedule the deployment of containers for their nightly builds or whenever changes are merged in GitHub.
 
@@ -69,6 +79,8 @@ We will cover:
 -   Configuring the config.php the PHP application
 
 -   Initializing the database for the PHP application
+
+-   Building the Docker Image Using php:5.6-apache
 
 -   Building the YAML-based application templates that can re-used on any Linux host running anywhere
 
