@@ -17,21 +17,21 @@ Customize & Run all the published Docker PHP application templates (including th
 	- [Building the Docker Image Using php:5.6-apache](#building-the-docker-image-using-php56-apache)
 	- [Building the YAML-based application templates that can re-used on any Linux host running anywhere](#building-the-yaml-based-application-templates-that-can-re-used-on-any-linux-host-running-anywhere)
 		- [Environment Variable Bindings Across Images](#environment-variable-bindings-across-images)
-		- [LAMP Stack (Linux-Apache-MySQL-PHP)](#3-tier-java-nginx--tomcat--mysql)
-		- [LAPP Stack (Linux-Apache-PostgreSQL-PHP)](#3-tier-java-nginx--jetty--mysql)
-		- [LAOP Stack (Linux-Apache-Oracle-XE-PHP)](#3-tier-java-nginx--jboss--mysql)
-		- [LAMP Stack (3-Tier Nginx-PHP-MySQL)](#3-tier-java-nginx--tomcat--mysql)
-		- [LAPP Stack (3-Tier Nginx-PHP-PostgreSQL)](#3-tier-java-nginx--tomcat--mysql)
-		- [LAOP Stack (3-Tier Nginx-PHP-Oracle-XE)](#3-tier-java-nginx--tomcat--mysql)
-		- [LAMP Stack (3-Tier Apache-HTTP-PHP-MySQL)](#3-tier-java-nginx--tomcat--mysql)
-		- [LAPP Stack (3-Tier Apache-HTTP-PHP-PostgreSQL)](#3-tier-java-nginx--tomcat--mysql)
-		- [LAOP Stack (3-Tier Apache-HTTP-PHP-Oracle-XE)](#3-tier-java-nginx--tomcat--mysql)
+		- [LAMP Stack (Linux-Apache-MySQL-PHP)](#lamp-stack-linux-apache-mysql-php)
+		- [LAPP Stack (Linux-Apache-PostgreSQL-PHP)](#lapp-stack-linux-apache-postgresql-php)
+		- [LAOP Stack (Linux-Apache-Oracle-XE-PHP)](#laop-stack-linux-apache-oracle-php)
+		- [LAMP Stack (3-Tier Nginx-PHP-MySQL)](#lamp-stack-3-tier-nginx-php-mysql)
+		- [LAPP Stack (3-Tier Nginx-PHP-PostgreSQL)](#lapp-stack-3-tier-nginx-php-postgresql)
+		- [LAOP Stack (3-Tier Nginx-PHP-Oracle-XE)](#laop-stack-3-tier-nginx-php-oracle-xe)
+		- [LAMP Stack (3-Tier Apache-HTTP-PHP-MySQL)](#lamp-stack-3-tier-apachehttp-php-mysql)
+		- [LAPP Stack (3-Tier Apache-HTTP-PHP-PostgreSQL)](#lapp-stack-3-tier-apachehttp-php-postgresql)
+		- [LAOP Stack (3-Tier Apache-HTTP-PHP-Oracle-XE)](#laop-stack-3-tier-apachehttp-php-oracle-xe)
 		- [Invoking a plug-in to initialize the database separately on a Docker LAMP Stack](#invoking-a-plug-in-to-initialize-the-database-separately-on-a-docker-lamp-stack)
 	- [Provisioning & Auto-Scaling the Underlying Infrastructure on Any Cloud](#provisioning--auto-scaling-the-underlying-infrastructure-on-any-cloud)
-	- [Deploying the Multi-Tier PHP Application on the Rackspace Cluster](#deploying-the-multi-tier-java-application-on-the-rackspace-cluster)
+	- [Deploying the Multi-Tier PHP Application on the Rackspace Cluster](#deploying-the-multi-tier-php-application-on-the-rackspace-cluster)
 	- [Accessing The In-Browser Terminal For The Running Containers](#accessing-the-in-browser-terminal-for-the-running-containers)
 	- [Monitoring the CPU, Memory & I/O Utilization of the Running Containers](#monitoring-the-cpu-memory--io-utilization-of-the-running-containers)
-	- [Enabling the Continuous Integration Using Automated App Run](#enabling-the-continuous-delivery-workflow-with-jenkins-to-update-the-war-file-of-the-running-application-when-a-build-is-triggered)
+	- [Enabling the Continuous Integration Using Automated App Run](#enabling-the-continuous-integration-using-automated-app-run)
 	- [Conclusion](#conclusion)
  
 
@@ -62,7 +62,7 @@ However many users were still confused on some of the fundamental aspects of app
 
 -   Where do these **environment variables** come from in your YAML-based application template?
 
--   How is the **database initialized with the proper schemas** needed from my Java application?
+-   How is the **database initialized with the proper schemas** needed from my PHP application?
 
 To address these questions, we created a sample “Names Directory” PHP application in this GitHub project that can be deployed on these application stacks:
 
@@ -205,7 +205,7 @@ Provide the required values as follows:
 
 -   **Git Credentials** – a user can store the credentials to a private GitHub repository securely in DCHQ. This can be done by navigating to **Manage** > **Cloud Providers and Repos** and clicking on the **+** to select **Credentials**
 
--   **Cluster** – the building of Docker images is orchestrated through the DCHQ agent. As a result, a user needs to select a cluster on which an agent will be used to execute the building of Docker images. If a cluster has not been created yet, please refer to this <a href=#provisioning--auto-scaling-the-underlying-infrastructure-on-any-cloud</a> to either register already running hosts or automate the provisioning of new virtual infrastructure.
+-   **Cluster** – the building of Docker images is orchestrated through the DCHQ agent. As a result, a user needs to select a cluster on which an agent will be used to execute the building of Docker images. If a cluster has not been created yet, please refer to this <a href=#provisioning--auto-scaling-the-underlying-infrastructure-on-any-cloud>section</a> to either register already running hosts or automate the provisioning of new virtual infrastructure.
 
 -   **Push to Registry** – a user can push the newly created image on either a public or private repository on Docker Hub or Quay. To register a Docker Hub or Quay account, a user should navigate to **Manage** > **Cloud Providers and Repos** and clicking on the **+** to select **Docker Registries**
 
@@ -733,7 +733,7 @@ Accessing The In-Browser Terminal For The Running Containers
 
 A command prompt icon should be available next to the containers’ names on the Live Apps page. This allows users to enter the container using a secure communication protocol through the agent message queue. A white list of commands can be defined by the Tenant Admin to ensure that users do not make any harmful changes on the running containers.
 
-For the Tomcat deployment for example, we used the command prompt to make sure that the Java WAR file was deployed under the /usr/local/tomcat/webapps/ directory.
+For the PHP deployment for example, we used the command prompt to make sure that the PHP code is indeed under the /var/www/html/ directory.
 
 <figure>
 <img src="screenshots/0-In-Browser%20Container%20Terminal.png"  />
@@ -754,14 +754,30 @@ A user can perform historical monitoring analysis and correlate issues to contai
 <img src="screenshots/0-Containers%20Monitoring.png"  />
 </figure>
 
-Enabling the Continuous Delivery Workflow with Jenkins to Update the WAR File of the Running Application when a Build is Triggered
+Enabling the Continuous Integration Using Automated App Run
 ----------------------------------------------------------------------------------------------------------------------------------
 
-For developers wishing to follow the “immutable” containers model by rebuilding Docker images containing the application code and spinning up new containers with every application update, DCHQ provides an automated build feature that allows developers to automatically create Docker images from Dockerfiles or private GitHub projects containing Dockerfiles.
+For developers wishing to follow the “immutable” containers model by rebuilding Docker images containing the application code and spinning up new containers with every application update, DCHQ provides an automated image build and automated app run features that allow developers to automatically create Docker images from Dockerfiles or private GitHub projects containing Dockerfiles, and then spin up full LAMP stacks using the latest images by scheduling the appliction deployment and customizing the application lease.
 
-However, many developers may wish to *update the running application server containers with the latest Java WAR file* instead. For that, DCHQ allows developers to enable a continuous delivery workflow with Jenkins. This can be done by clicking on the **Actions** menu of the running application and then selecting **Continuous Delivery**. A user can select a Jenkins instance that has already been registered with DCHQ, the actual Job on Jenkins that will produce the latest WAR file, and then a BASH script plug-in to grab this build and deploy it on a running application server. Once this policy is saved, DCHQ will grab the latest WAR file from Jenkins any time a build is triggered and deploy it on the running application server.
+As explained in the Docker image build <a href="#building-the-docker-image-using-php56-apache">section</a>, a user can schedule two parallel builds for the PHP image (that's baseed on <a href="https://hub.docker.com/_/php/"> php:5.6-apache</a>).
 
-Developers, as a result will always have the latest Java WAR file deployed on their running containers in DEV/TEST environments.
+-   **latest**: one build will constantly override the latest tag with the latest changes commited to your GitHub project
+
+-   **{{date}}** or **{{timestamp}}**: a parallel build that will back up all the images created using either a formatted date or time-stamp for the tag name
+
+A user can then navigate to **Automate** > **App Run** and then click on the **+** button to create a new "Automated App Run" policy. A user can then complete the required fields - like:
+
+-   **App Name**: the name that will be given to the application deployed
+
+-   **Lease**: by default, an unlimited lease is selected. However an automated app run is most useful for DEV/TEST environments where users are expecting an already running application with the latest code every time they walk into the office in the morning. For that, users can provide a lease of 1-day or 1-week -- depending on their needs.
+
+-   **Blueprint**: a user can searche for an already created YAML-based application template (or blueprint) -- similar to the examples given in this project.
+
+-   **Cluster**: this is the cluster on which the application will be deployed. A user will only see a list of clusters to which he/she has been given access to.
+   
+-   **Cron Expression**: the application deployment can be scheduled using these simple cron expressions. For example, 0 45 15 ? * MON-FRI will fire off the application deployment at 3:45pm UTC time between Monday-Friday.
+
+-   **Who Can Manage**: a user can provide granular entitlements here to dictate who else can manage this "App Run" policy.
 
 <figure>
 <img src="screenshots/0-Continuous%20Delivery.png"  />
@@ -772,9 +788,9 @@ Developers, as a result will always have the latest Java WAR file deployed on th
 Conclusion
 ----------
 
-Containerizing enterprise Java applications is still a challenge mostly because existing application composition frameworks do not address complex dependencies, external integrations or auto-scaling workflows post-provision. Moreover, the ephemeral design of containers meant that developers had to spin up new containers and re-create the complex dependencies & external integrations with every version update.
+Containerizing enterprise PHP applications is still a challenge mostly because existing application composition frameworks do not address complex dependencies, external integrations or auto-scaling workflows post-provision. 
 
-DCHQ, available in hosted and on-premise versions, addresses all of these challenges and simplifies the containerization of enterprise Java applications through an advance application composition framework that facilitates cross-image environment variable bindings, extensible BASH script plug-ins that can be invoked at request time or post-provision, and application clustering for high availability across multiple hosts or regions with support for auto scaling.
+DCHQ, available in hosted and on-premise versions, addresses all of these challenges and simplifies the containerization of enterprise PHP applications through an advance application composition framework that facilitates cross-image environment variable bindings, extensible BASH script plug-ins that can be invoked at request time or post-provision, and application clustering for high availability across multiple hosts or regions with support for auto scaling.
 
 Sign Up for FREE on <http://DCHQ.io> or download [DCHQ On-Premise](<http://dchq.co/dchq-on-premise.html>) to get access to out-of-box multi-tier Java application templates along with application lifecycle management functionality like monitoring, container updates, scale in/out and continuous delivery.
 
