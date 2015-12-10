@@ -760,11 +760,11 @@ A user can perform historical monitoring analysis and correlate issues to contai
 Enabling the Continuous Integration Using Automated App Run
 ----------------------------------------------------------------------------------------------------------------------------------
 
-For developers wishing to follow the “immutable” containers model by rebuilding Docker images containing the application code and spinning up new containers with every application update, DCHQ provides an automated image build and automated app run features that allow developers to automatically create Docker images from Dockerfiles or private GitHub projects containing Dockerfiles, and then spin up full LAMP stacks using the latest images by scheduling the appliction deployment and customizing the application lease.
+For developers wishing to follow the “immutable” containers model by rebuilding Docker images containing the application code and spinning up new containers with every application update, DCHQ provides an automated image build and automated app run features that allow developers to automatically create Docker images from Dockerfiles or private GitHub projects containing Dockerfiles, and then spin up full LAMP stacks using the latest images by scheduling the application deployment and customizing the application lease.
 
-As explained in the Docker image build <a href="#building-the-docker-image-using-php56-apache">section</a>, a user can schedule two parallel builds for the PHP image (that's baseed on <a href="https://hub.docker.com/_/php/"> php:5.6-apache</a>).
+As explained in the Docker image build <a href="#building-the-docker-image-using-php56-apache">section</a>, a user can schedule two parallel builds for the PHP image (that's based on <a href="https://hub.docker.com/_/php/"> php:5.6-apache</a>).
 
--   **latest**: one build will constantly override the latest tag with the latest changes commited to your GitHub project
+-   **latest**: one build will constantly override the latest tag with the latest changes committed to your GitHub project
 
 -   **{{date}}** or **{{timestamp}}**: a parallel build that will back up all the images created using either a formatted date or time-stamp for the tag name
 
