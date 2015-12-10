@@ -12,9 +12,9 @@ Customize & Run all the published Docker PHP application templates (including th
 - [DCHQ - Docker PHP Example ](#dchq---docker-php-example-)
 - [A Step by Step Guide for Deploying & Managing a PHP Application on Docker-based LAMP, LAPP, and LAOP Stacks](#dchq---docker-php-example-)
 	- [Background](#background)
-	- [Configuring the config.php the PHP application](#configuring-the-webxml-and-webapp-configxml-files-in-the-java-application)
-	- [Initializing the database for the PHP application](#configuring-the-webxml-and-webapp-configxml-files-in-the-java-application)
-	- [Building the Docker Image Using php:5.6-apache](#configuring-the-webxml-and-webapp-configxml-files-in-the-java-application)
+	- [Configuring the config.php the PHP application](#configuring-the-configphp-the-php-application)
+	- [Initializing the database for the PHP application](#initializing-the-database-for-the-php-application)
+	- [Building the Docker Image Using php:5.6-apache](#building-the-docker-image-using-php56-apache)
 	- [Building the YAML-based application templates that can re-used on any Linux host running anywhere](#building-the-yaml-based-application-templates-that-can-re-used-on-any-linux-host-running-anywhere)
 		- [Environment Variable Bindings Across Images](#environment-variable-bindings-across-images)
 		- [LAMP Stack (Linux-Apache-MySQL-PHP)](#3-tier-java-nginx--tomcat--mysql)
@@ -66,11 +66,11 @@ However many users were still confused on some of the fundamental aspects of app
 
 To address these questions, we created a sample “Names Directory” PHP application in this GitHub project that can be deployed on these application stacks:
 
--   LAMP Stack (Linux-Apache-MySQL-PHP)
+-   Docker LAMP Stack (Linux-Apache-MySQL-PHP)
 
--   LAPP Stack (Linux-Apache-PostgreSQL-PHP)
+-   Docker LAPP Stack (Linux-Apache-PostgreSQL-PHP)
 
--   LAOP Stack (Linux-Apache-Oracle-PHP)
+-   Docker LAOP Stack (Linux-Apache-Oracle-PHP)
 
 In this project, we will provide a step-by-step guide for configuring, deploying and managing this Java application using different application stacks and on different cloud/virtual infrastructure.
 
@@ -111,9 +111,9 @@ This is the most important step in “Dockerizing” your PHP application. In or
 
 -   Any other parameters that you would like to change at request time (e.g. the min/max connection pool size, idle timeout, etc.)
 
-To achieve this, you will first need to configure **php.config**.
+To achieve this, you will first need to configure **config.php**.
 
-<https://github.com/dchqinc/dchq-docker-java-example/blob/master/src/main/webapp/WEB-INF/web.xml>
+<https://github.com/dchqinc/dchq-docker-php-example/blob/master/software/config.php>
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     static function getInstance() {
@@ -155,39 +155,37 @@ Initializing the database for the PHP application
 
 We typically recommend initializing the database schema as part of the PHP application deployment itself. This way, you don’t have to worry about maintaining separate SQL files that need to be executed on the database separately.
 
-However if you already have those SQL files and you still prefer executing them on the database separately – then DCHQ can help you automate this process through its plug-in framework. You can refer to this <a href=#invoking-a-plug-in-to-initialize-the-database-separately-on-a-3-tier-java-nginx--tomcat--mysql>section</a> for more information.
+However if you already have those SQL files and you still prefer executing them on the database separately – then DCHQ can help you automate this process through its plug-in framework. You can refer to this <a href=#invoking-a-plug-in-to-initialize-the-database-separately-on-a-docker-lamp-stack>section</a> for more information.
 
 In order to include the SQL scripts for creating the database tables in the PHP application, you will need to configure **Persistence.php** file to populate the database using different SQL statements (depending on the database used). The populateDatabase() function works with MySQL, PostgreSQL and Oracle.
 
-<https://github.com/dchqinc/dchq-docker-java-example/blob/master/src/main/webapp/WEB-INF/spring/webapp-config.xml>
+<https://github.com/dchqinc/dchq-docker-php-example/blob/master/software/class/Persistence.php>
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    public function populateDatabase(){
-        
+    public function populateDatabase() {
         //Get default PDO connection instance
         $this->setConnection(PersistenceFactory::getDefault());
-        
         //Diferent creation strings based on provider..
         $providers = array(
             "mysql" => "CREATE TABLE IF NOT EXISTS `directories` (`ID` int(11) NOT NULL AUTO_INCREMENT,`FIRSTNAME` varchar(255) DEFAULT NULL,`LASTNAME` varchar(255) DEFAULT NULL,`ACTIVE` varchar(3) NOT NULL,PRIMARY KEY (`id`)) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1",
             "postgresql" => "CREATE TABLE directories (id SERIAL, FIRSTNAME varchar(255), LASTNAME varchar(255), ACTIVE varchar(3))",
             "oraclexe" => "CREATE TABLE directories (ID VARCHAR2(50) PRIMARY KEY NOT NULL,FIRSTNAME VARCHAR2(255), LASTNAME VARCHAR2(255), ACTIVE VARCHAR2(10))");
-
         try {
-            
             $queryStr = $providers[Config::getInstance()->getProvider()];
-
             if ($queryStr == null) {
                 echo "You have a syntax error in enviroment parameters.";
                 exit();
             }
-            
-            $query = $this->getConnection()->prepare($queryStr);
-            $query->execute();
+            if (Config::getInstance()->getProvider() == "oraclexe") {
+                $query = oci_parse($this->getConnection(), $queryStr);
+                @oci_execute($query);
+            } else {
+                $query = $this->getConnection()->prepare($queryStr);
+                $query->execute();
+            }
         } catch (PDOException $ex) {
             echo "There was an error creating 'directories' table: " . $ex->getMessage();
         }
-        
     }
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -195,8 +193,35 @@ In order to include the SQL scripts for creating the database tables in the PHP 
 
 Building the Docker Image Using php:5.6-apache
 -------------------------------------------------------------
-Once the PHP application is configured, you simply need to create a Docker image with your PHP code. Once logged in to DCHQ (either the hosted DCHQ.io or on-premise version), a user can navigate to **Automate** > **Image Build** and then click on the **+** button to create a new **Dockerfile (Git/GitHub/BitBucket)** image build.
+Once the PHP application is configured, you simply need to create a Docker image with your PHP code. 
 
+Once logged in to DCHQ (either the hosted DCHQ.io or on-premise version), a user can navigate to **Automate** > **Image Build** and then click on the **+** button to create a new **Dockerfile (Git/GitHub/BitBucket)** image build.
+
+Provide the required values as follows:
+
+-   **Git URL** – https://github.com/dchqinc/dchq-docker-php-example
+
+-   **Git Branch** – this field is optional -- but a user can specify a branch from a GitHub project. The default branch if master.
+
+-   **Git Credentials** – a user can store the credentials to a private GitHub repository securely in DCHQ. This can be done by navigating to **Manage** > **Cloud Providers and Repos** and clicking on the **+** to select **Credentials**
+
+-   **Cluster** – the building of Docker images is orchestrated through the DCHQ agent. As a result, a user needs to select a cluster on which an agent will be used to execute the building of Docker images. If a cluster has not been created yet, please refer to this <a href=#invoking-a-plug-in-to-initialize-the-database-separately-on-a-docker-lamp-stack>section</a> to either register already running hosts or automate the provisioning of new virtual infrastructure.
+
+-   **Push to Registry** – a user can push the newly created image on either a public or private repository on Docker Hub or Quay. To register a Docker Hub or Quay account, a user should navigate to **Manage** > **Cloud Providers and Repos** and clicking on the **+** to select **Docker Registries**
+
+-   **Repository** – this is the name of the repository on which the image will be pushed. For example, our image was pushed to **dchq/php-example:latest**
+
+-   **Tag** – this is the tag name that you would like to give for the new image. The supported tag names in DCHQ include:
+	
+	- **{{date}}** -- formatted date
+	
+	- **{{timestamp}}** -- the full time-stamp
+
+-   **Cron Expression** – a user can schedule the building of Docker images using out-of-box cron expressions. This facilitates daily and nightly builds for users.
+
+Once the required fields are completed, a user can click **Save**.
+
+A user can then click on the **Play Button** to build the Docker image on-demand.
 
  
 
