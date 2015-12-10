@@ -72,7 +72,7 @@ To address these questions, we created a sample “Names Directory” PHP applic
 
 -   Docker LAOP Stack (Linux-Apache-Oracle-PHP)
 
-In this project, we will provide a step-by-step guide for configuring, deploying and managing this Java application using different application stacks and on different cloud/virtual infrastructure.
+In this project, we will provide a step-by-step guide for configuring, deploying and managing this PHP application using different application stacks and on different cloud/virtual infrastructure.
 
 We will cover:
 
@@ -97,7 +97,7 @@ We will cover:
 Configuring the config.php the PHP application
 ---------------------------------------------------------------------------
 
-You can clone this sample “Names Directory” Java application from GitHub.
+You can clone this sample “Names Directory” PHP application from GitHub.
 
 **git clone** <https://github.com/dchqinc/dchq-docker-php-example.git>
 
@@ -205,7 +205,7 @@ Provide the required values as follows:
 
 -   **Git Credentials** – a user can store the credentials to a private GitHub repository securely in DCHQ. This can be done by navigating to **Manage** > **Cloud Providers and Repos** and clicking on the **+** to select **Credentials**
 
--   **Cluster** – the building of Docker images is orchestrated through the DCHQ agent. As a result, a user needs to select a cluster on which an agent will be used to execute the building of Docker images. If a cluster has not been created yet, please refer to this <a href=#invoking-a-plug-in-to-initialize-the-database-separately-on-a-docker-lamp-stack>section</a> to either register already running hosts or automate the provisioning of new virtual infrastructure.
+-   **Cluster** – the building of Docker images is orchestrated through the DCHQ agent. As a result, a user needs to select a cluster on which an agent will be used to execute the building of Docker images. If a cluster has not been created yet, please refer to this <a href=#provisioning--auto-scaling-the-underlying-infrastructure-on-any-cloud</a> to either register already running hosts or automate the provisioning of new virtual infrastructure.
 
 -   **Push to Registry** – a user can push the newly created image on either a public or private repository on Docker Hub or Quay. To register a Docker Hub or Quay account, a user should navigate to **Manage** > **Cloud Providers and Repos** and clicking on the **+** to select **Docker Registries**
 
@@ -223,6 +223,52 @@ Once the required fields are completed, a user can click **Save**.
 
 A user can then click on the **Play Button** to build the Docker image on-demand.
 
+<figure>
+<img src="screenshots/0-Rackspace%20Cluster.png"  />
+</figure>
+
+Here's the actual Dockerfile used to build this Docker image from this GitHub repository:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+FROM php:5.6-apache
+
+MAINTAINER Amjad Afanah (amjad@dchq.io)
+
+RUN apt-get update
+RUN apt-get -y install php-pear php5-dev libmysqlclient15-dev libpq-dev
+RUN docker-php-ext-install pdo pdo_mysql pdo_pgsql
+
+COPY ./software /var/www/html/
+
+# Oracle instantclient
+COPY ./software/oracle/instantclient-basic-linux.x64-11.2.0.4.0.zip /tmp/instantclient-basic-linux.x64-11.2.0.4.0.zip
+COPY ./software/oracle/instantclient-sdk-linux.x64-11.2.0.4.0.zip /tmp/instantclient-sdk-linux.x64-11.2.0.4.0.zip
+COPY ./software/oracle/instantclient-sqlplus-linux.x64-11.2.0.4.0.zip /tmp/instantclient-sqlplus-linux.x64-11.2.0.4.0.zip
+COPY ./software/oracle/tns.ora /etc/tns.ora
+
+RUN apt-get install -y unzip
+
+RUN unzip /tmp/instantclient-basic-linux.x64-11.2.0.4.0.zip -d /usr/local/
+RUN unzip /tmp/instantclient-sdk-linux.x64-11.2.0.4.0.zip -d /usr/local/
+RUN unzip /tmp/instantclient-sqlplus-linux.x64-11.2.0.4.0.zip -d /usr/local/
+RUN ln -s /usr/local/instantclient_11_2 /usr/local/instantclient
+RUN ln -s /usr/local/instantclient/libclntsh.so.11.1 /usr/local/instantclient/libclntsh.so
+RUN ln -s /usr/local/instantclient/sqlplus /usr/bin/sqlplus
+
+RUN apt-get install libaio-dev -y
+
+ENV LD_LIBRARY_PATH /usr/local/instantclient
+ENV TNS_ADMIN       /usr/local/instantclient
+ENV ORACLE_BASE     /usr/local/instantclient
+ENV ORACLE_HOME     /usr/local/instantclient
+
+RUN echo 'instantclient,/usr/local/instantclient' | pecl install oci8
+
+RUN echo "extension=oci8.so" > /usr/local/etc/php/conf.d/oci8.ini
+
+RUN apt-get clean -y
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
  
 
 Building the YAML-based application templates that can re-used on any Linux host running anywhere
@@ -230,17 +276,23 @@ Building the YAML-based application templates that can re-used on any Linux host
 
 Once logged in to DCHQ (either the hosted DCHQ.io or on-premise version), a user can navigate to **Manage** > **Templates** and then click on the **+** button to create a new **Docker Compose** template.
 
-We have created **3 application templates** using the **official images from Docker Hub** for the same “Names Directory” PHP application – but for different application servers and databases.
+We have created **9 application templates** using the **official images from Docker Hub** for the same “Names Directory” PHP application – but for different application servers and databases.
 
-The templates include examples of the following application stacks (for the same Java application):
--   **LAMP Stack (Linux-Apache-MySQL-PHP)
--   **LAPP Stack (Linux-Apache-PostgreSQL-PHP)
--   **LAOP Stack (Linux-Apache-Oracle-PHP)
+The templates include examples of the following application stacks (for the same PHP application):
+-   Docker LAMP Stack (Linux-Apache-MySQL-PHP)
+-   Docker LAPP Stack (Linux-Apache-PostgreSQL-PHP)
+-   Docker LAOP Stack (Linux-Apache-Oracle-XE-PHP)
+-   Docker LAMP Stack (3-Tier Nginx-PHP-MySQL)
+-   Docker LAPP Stack (3-Tier Nginx-PHP-PostgreSQL)
+-   Docker LAOP Stack (3-Tier Nginx-PHP-Oracle-XE)
+-   Docker LAMP Stack (3-Tier Apache-HTTP-PHP-MySQL)
+-   Docker LAPP Stack (3-Tier Apache-HTTP-PHP-PostgreSQL)
+-   Docker LAOP Stack (3-Tier Apache-HTTP-PHP-Oracle-XE)
 
 
 ### Environment Variable Bindings Across Images
 
-Additionally, a user can create cross-image environment variable bindings by making a reference to another image’s environment variable. In this case, we have made several bindings – including DB_HOST={{MySQL|container_private_ip}} – in which the database container IP is resolved dynamically at request time and is used to ensure that the Apache-PHP Server can establish a connection with the database.
+Additionally, a user can create cross-image environment variable bindings by making a reference to another image’s environment variable. In this case, we have made several bindings – including **DB_HOST={{MySQL|container_private_ip}}** – in which the database container IP is resolved dynamically at request time and is used to ensure that the Apache-PHP Server can establish a connection with the database.
 
 Here is a list of supported environment variable values:
 
@@ -260,8 +312,10 @@ Here is a list of supported environment variable values:
 
 ### LAMP Stack (Linux-Apache-MySQL-PHP)
 
+[![Customize and Run](https://dl.dropboxusercontent.com/u/4090128/dchq-customize-and-run.png)](https://www.dchq.io/landing/products.html#/library?org=DCHQ&bl=2c91801c5166ae6201517aeb57fa266d)
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Apache-PHP:
+PHP:
   image: dchq/php-example:latest
   mem_min: 600m
   publish_all: true
@@ -279,15 +333,17 @@ MySQL:
   environment:
   - MYSQL_USER=root
   - MYSQL_DATABASE=mysql
-  - MYSQL_ROOT_PASSWORD=password
+  - MYSQL_ROOT_PASSWORD={{alphanumeric | 8}}
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
  
 
 ### LAPP Stack (Linux-Apache-PostgreSQL-PHP)
 
+[![Customize and Run](https://dl.dropboxusercontent.com/u/4090128/dchq-customize-and-run.png)](https://www.dchq.io/landing/products.html#/library?org=DCHQ&bl=2c91801c5166ae6201517fae05300685)
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Apache-PHP:
+PHP:
   image: dchq/php-example:latest
   mem_min: 600m
   publish_all: true
@@ -312,11 +368,243 @@ Postgres:
 
 ### LAOP Stack (Linux-Apache-Oracle-PHP)
 
+[![Customize and Run](https://dl.dropboxusercontent.com/u/4090128/dchq-customize-and-run.png)](https://www.dchq.io/landing/products.html#/library?org=DCHQ&bl=2c91801c5166ae62015183a0299a2e68)
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Apache-PHP:
+PHP:
   image: dchq/php-example:latest
   mem_min: 600m
   publish_all: true
+  environment:
+  - DB_HOST={{Oracle|container_private_ip}}
+  - DB_USER={{Oracle|username}}
+  - DB_PASS={{Oracle|password}}
+  - DB_NAME={{Oracle|sid}}
+  - DB_PORT=1521
+  - DB_PROVIDER=oraclexe
+Oracle:
+  image: wnameless/oracle-xe-11g:latest
+  publish_all: false
+  mem_min: 400m
+  environment:
+    - username=system
+    - password=oracle
+    - sid=xe
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ 
+
+### LAMP Stack (3-Tier Nginx-PHP-MySQL)
+
+[![Customize and Run](https://dl.dropboxusercontent.com/u/4090128/dchq-customize-and-run.png)](https://www.dchq.io/landing/products.html#/library?org=DCHQ&bl=2c91801e518535a8015187b7ad4a7128)
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Nginx-LB:
+  image: nginx:latest
+  publish_all: true
+  mem_min: 50m
+  plugins:
+    - !plugin
+      id: 0H1Nk
+      restart: true
+      arguments:
+        - servers=server {{PHP | container_ip}}:80;
+PHP:
+  image: dchq/php-example:latest
+  cluster_size: 1
+  mem_min: 600m
+  publish_all: false
+  environment:
+  - DB_HOST={{MySQL|container_private_ip}}
+  - DB_USER={{MySQL|MYSQL_USER}}
+  - DB_PASS={{MySQL|MYSQL_ROOT_PASSWORD}}
+  - DB_NAME={{MySQL|MYSQL_DATABASE}}
+  - DB_PORT=3306
+  - DB_PROVIDER=mysql
+MySQL:
+  image: mysql:latest
+  mem_min: 400m
+  publish_all: false
+  environment:
+  - MYSQL_USER=root
+  - MYSQL_DATABASE=mysql
+  - MYSQL_ROOT_PASSWORD={{alphanumeric | 8}}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ 
+
+### LAPP Stack (3-Tier Nginx-PHP-PostgreSQL)
+
+[![Customize and Run](https://dl.dropboxusercontent.com/u/4090128/dchq-customize-and-run.png)](https://www.dchq.io/landing/products.html#/library?org=DCHQ&bl=2c91801e518535a8015188a8d18e1bac)
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Nginx-LB:
+  image: nginx:latest
+  publish_all: true
+  mem_min: 50m
+  plugins:
+    - !plugin
+      id: 0H1Nk
+      restart: true
+      arguments:
+        - servers=server {{PHP | container_ip}}:80;
+PHP:
+  image: dchq/php-example:latest
+  mem_min: 600m
+  publish_all: false
+  environment:
+  - DB_HOST={{Postgres|container_private_ip}}
+  - DB_USER={{Postgres|POSTGRES_USER}}
+  - DB_PASS={{Postgres|POSTGRES_PASSWORD}}
+  - DB_NAME={{Postgres|POSTGRES_DB}}
+  - DB_PORT=5432
+  - DB_PROVIDER=postgresql
+Postgres:
+  image: postgres:latest
+  publish_all: false
+  mem_min: 400m
+  environment:
+    - POSTGRES_USER=root
+    - POSTGRES_PASSWORD={{alphanumeric | 8}}
+    - POSTGRES_DB=postgres
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ 
+
+### LAOP Stack (3-Tier Nginx-PHP-Oracle-XE)
+
+[![Customize and Run](https://dl.dropboxusercontent.com/u/4090128/dchq-customize-and-run.png)](https://www.dchq.io/landing/products.html#/library?org=DCHQ&bl=2c91801e518535a8015188b52f0d1dd8)
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Nginx-LB:
+  image: nginx:latest
+  publish_all: true
+  mem_min: 50m
+  plugins:
+    - !plugin
+      id: 0H1Nk
+      restart: true
+      arguments:
+        - servers=server {{PHP | container_ip}}:80;
+PHP:
+  image: dchq/php-example:latest
+  mem_min: 600m
+  publish_all: false
+  environment:
+  - DB_HOST={{Oracle|container_private_ip}}
+  - DB_USER={{Oracle|username}}
+  - DB_PASS={{Oracle|password}}
+  - DB_NAME={{Oracle|sid}}
+  - DB_PORT=1521
+  - DB_PROVIDER=oraclexe
+Oracle:
+  image: wnameless/oracle-xe-11g:latest
+  publish_all: false
+  mem_min: 400m
+  environment:
+    - username=system
+    - password=oracle
+    - sid=xe
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ 
+
+### LAMP Stack (3-Tier ApacheHTTP-PHP-MySQL)
+
+[![Customize and Run](https://dl.dropboxusercontent.com/u/4090128/dchq-customize-and-run.png)](https://www.dchq.io/landing/products.html#/library?org=DCHQ&bl=2c91801e518535a80151878da33069ab)
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+HTTP-LB:
+  image: httpd:latest
+  publish_all: true
+  mem_min: 50m
+  plugins:
+    - !plugin
+      id: uazUi
+      restart: true
+      arguments:
+        - BalancerMembers=BalancerMember http://{{PHP | container_ip}}:80
+PHP:
+  image: dchq/php-example:latest
+  cluster_size: 1
+  mem_min: 600m
+  publish_all: false
+  environment:
+  - DB_HOST={{MySQL|container_private_ip}}
+  - DB_USER={{MySQL|MYSQL_USER}}
+  - DB_PASS={{MySQL|MYSQL_ROOT_PASSWORD}}
+  - DB_NAME={{MySQL|MYSQL_DATABASE}}
+  - DB_PORT=3306
+  - DB_PROVIDER=mysql
+MySQL:
+  image: mysql:latest
+  mem_min: 400m
+  publish_all: false
+  environment:
+  - MYSQL_USER=root
+  - MYSQL_DATABASE=mysql
+  - MYSQL_ROOT_PASSWORD={{alphanumeric | 8}}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ 
+
+### LAPP Stack (3-Tier ApacheHTTP-PHP-PostgreSQL)
+
+[![Customize and Run](https://dl.dropboxusercontent.com/u/4090128/dchq-customize-and-run.png)](https://www.dchq.io/landing/products.html#/library?org=DCHQ&bl=2c91801e518535a8015187a44b986dca)
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+HTTP-LB:
+  image: httpd:latest
+  publish_all: true
+  mem_min: 50m
+  plugins:
+    - !plugin
+      id: uazUi
+      restart: true
+      arguments:
+        - BalancerMembers=BalancerMember http://{{PHP | container_ip}}:80
+PHP:
+  image: dchq/php-example:latest
+  mem_min: 600m
+  publish_all: false
+  environment:
+  - DB_HOST={{Postgres|container_private_ip}}
+  - DB_USER={{Postgres|POSTGRES_USER}}
+  - DB_PASS={{Postgres|POSTGRES_PASSWORD}}
+  - DB_NAME={{Postgres|POSTGRES_DB}}
+  - DB_PORT=5432
+  - DB_PROVIDER=postgresql
+Postgres:
+  image: postgres:latest
+  publish_all: false
+  mem_min: 400m
+  environment:
+    - POSTGRES_USER=root
+    - POSTGRES_PASSWORD={{alphanumeric | 8}}
+    - POSTGRES_DB=postgres
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ 
+
+### LAOP Stack (3-Tier ApacheHTTP-PHP-Oracle-XE)
+
+[![Customize and Run](https://dl.dropboxusercontent.com/u/4090128/dchq-customize-and-run.png)](https://www.dchq.io/landing/products.html#/library?org=DCHQ&bl=2c91801e518535a8015187a4cc896dcf)
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+HTTP-LB:
+  image: httpd:latest
+  publish_all: true
+  mem_min: 50m
+  plugins:
+    - !plugin
+      id: uazUi
+      restart: true
+      arguments:
+        - BalancerMembers=BalancerMember http://{{PHP | container_ip}}:80
+PHP:
+  image: dchq/php-example:latest
+  mem_min: 600m
+  publish_all: false
   environment:
   - DB_HOST={{Oracle|container_private_ip}}
   - DB_USER={{Oracle|username}}
@@ -429,7 +717,7 @@ Once the Machine Compose template is saved, a user can request this machine from
 
  
 
-Deploying the Multi-Tier Java Application on the Rackspace Cluster
+Deploying the Multi-Tier PHP Application on the Rackspace Cluster
 ------------------------------------------------------------------
 
 Once the Cloud Servers are provisioned, a user can deploy a multi-tier, Docker-based PHP applications on the new Cloud Servers. This can be done by navigating to the Self-Service Library and then clicking on Customize to request a multi-tier application.
