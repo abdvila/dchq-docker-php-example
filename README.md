@@ -92,6 +92,8 @@ We will cover:
 
 -   Enabling the Continuous Integration Using Automated App Run
 
+-   Scaling out the PHP application
+
  
 
 Configuring the config.php the PHP application
@@ -199,9 +201,9 @@ Once logged in to DCHQ (either the hosted DCHQ.io or on-premise version), a user
 
 Provide the required values as follows:
 
--   **Git URL** – https://github.com/dchqinc/dchq-docker-php-example
+-   **Git URL** – https://github.com/dchqinc/dchq-docker-php-example.git
 
--   **Git Branch** – this field is optional -- but a user can specify a branch from a GitHub project. The default branch if master.
+-   **Git Branch** – this field is optional -- but a user can specify a branch from a GitHub project. The default branch is master.
 
 -   **Git Credentials** – a user can store the credentials to a private GitHub repository securely in DCHQ. This can be done by navigating to **Manage** > **Cloud Providers and Repos** and clicking on the **+** to select **Credentials**
 
