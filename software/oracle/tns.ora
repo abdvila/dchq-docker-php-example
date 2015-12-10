@@ -1,0 +1,9 @@
+XE =
+ (DESCRIPTION = 
+   (ADDRESS_LIST =
+     (ADDRESS = (PROTOCOL = TCP)(HOST = $DB_HOST)(PORT = $DB_PORT))
+   )
+ (CONNECT_DATA =
+   (SERVICE_NAME = $DB_NAME)
+ )
+)
