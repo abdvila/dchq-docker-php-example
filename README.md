@@ -32,6 +32,7 @@ Customize & Run all the published Docker PHP application templates (including th
 	- [Accessing The In-Browser Terminal For The Running Containers](#accessing-the-in-browser-terminal-for-the-running-containers)
 	- [Monitoring the CPU, Memory & I/O Utilization of the Running Containers](#monitoring-the-cpu-memory--io-utilization-of-the-running-containers)
 	- [Enabling the Continuous Integration Using Automated App Run](#enabling-the-continuous-integration-using-automated-app-run)
+	- [Scaling out the PHP application](#scaling-out-the-php-application)
 	- [Conclusion](#conclusion)
  
 
@@ -773,7 +774,7 @@ A user can then navigate to **Automate** > **App Run** and then click on the **+
 
 -   **Lease**: by default, an unlimited lease is selected. However an automated app run is most useful for DEV/TEST environments where users are expecting an already running application with the latest code every time they walk into the office in the morning. For that, users can provide a lease of 1-day or 1-week -- depending on their needs.
 
--   **Blueprint**: a user can searche for an already created YAML-based application template (or blueprint) -- similar to the examples given in this project.
+-   **Blueprint**: a user can search for an already created YAML-based application template (or blueprint) -- similar to the examples given in this project.
 
 -   **Cluster**: this is the cluster on which the application will be deployed. A user will only see a list of clusters to which he/she has been given access to.
    
@@ -784,6 +785,31 @@ A user can then navigate to **Automate** > **App Run** and then click on the **+
 <figure>
 <img src="screenshots/0-Continuous%20Delivery.png"  />
 </figure>
+
+ 
+
+Scaling out the PHP application
+-------------------------------------------------
+
+If the running application becomes resource constrained, a user can to scale out the application to meet the increasing load. Moreover, a user can schedule the scale out during business hours and the scale in during weekends for example.
+
+To scale out the cluster of PHP containers from 1 to 2, a user can click on the **Actions** menu of the running application and then select **Scale Out**. A user can then specify the new size for the cluster and then click on **Run Now**.
+
+<figure>
+<img src="screenshots/0-Scale%20Out.png"  />
+</figure>
+
+We then used the BASH plug-in to update Apache HTTP Server's httpd.conf file so that it’s aware of the new application server added. The BASH script plug-ins can also be scheduled to accommodate use cases like cleaning up logs or updating configurations at defined frequencies. 
+
+To execute a plug-in on a running container, a user can click on the **Actions** menu of the running application and then select **Plug-ins**. A user can then select the load balancer (Apache HTTP Server) container, search for the plug-in that needs to be executed, enable container restart using the toggle button. The default argument for this plug-in will dynamically resolve all the container IP’s of the running PHP containers and add them as part of the httpd.conf file.
+
+<figure>
+<img src="screenshots/0-Plug-in%20Update%20Apache%20HTTP%20Server.png"  />
+</figure>
+
+An application time-line is available to track every change made to the application for auditing and diagnostics. This can be accessed from the expandable menu at the bottom of the page of a running application.
+
+Alerts and notifications are available for when containers or hosts are down or when the CPU & Memory Utilization of either hosts or containers exceed a defined threshold.
 
  
 
