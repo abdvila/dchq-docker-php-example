@@ -46,9 +46,6 @@ Customize & Run all the published Docker PHP application templates (including th
 
 DCHQ - Docker PHP Example 
 ===========================
-<figure>
-<img src="/screenshots/0-Names%20Directory%20Java%20App.png" alt="" />
-</figure>
 
  
 
